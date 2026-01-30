@@ -40,7 +40,7 @@ def create_payment(amount):
         "currency": "USDT",
         "order_id": order_id,
         "desc": f"Оплата тарифа {amount} USDT",
-        "callback_url": "https://ТВОЙ_RENDER_URL/webhook"
+        "callback_url": "https://archwarg-bot.onrender.com/webhook"
     }
 
     r = requests.post(url, json=data, headers=headers)
