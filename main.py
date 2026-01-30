@@ -41,9 +41,9 @@ def create_payment_sync(amount):
     data = {
         "shop_id": SHOP_ID,
         "amount": amount,
-        "currency": "USDT",
+        "currency": "USDT_TRC20",
         "order_id": order_id,
-        "desc": f"Оплата тарифа {amount} USDT",
+        "desc": f"Оплата тарифа {amount} USDT_TRC20",
         "callback_url": f"{RENDER_URL}/webhook"
     }
 
@@ -57,7 +57,7 @@ def create_payment_sync(amount):
     if "pay_url" not in response:
         return f"❌ Ошибка API: {response}"
 
-    return response["pay_url"]
+    return response["result"]["pay_url"]
 
 
 
