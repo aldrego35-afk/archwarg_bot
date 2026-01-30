@@ -2,6 +2,6 @@ services:
   - type: web
     name: archwarg_bot
     env: python
-    pythonVersion: 3.11.0
+    pythonVersion: 3.11.14
     buildCommand: pip install -r requirements.txt
     startCommand: python main.py
