@@ -48,34 +48,37 @@ def create_payment_sync(amount):
     }
 
     r = requests.post(url, json=data, headers=headers)
-    return r.json()["pay_url"]
 
+    print("STATUS:", r.status_code)
+    print("RESPONSE:", r.text)   # 👈 САМОЕ ВАЖНОЕ
 
-async def create_payment(amount):
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(None, create_payment_sync, amount)
+    response = r.json()
+
+    if "pay_url" not in response:
+        return f"❌ Ошибка API: {response}"
+
+    return response["pay_url"]
+
 
 
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
     keyboard = InlineKeyboardMarkup()
-    keyboard.add(InlineKeyboardButton("🔥 Тариф 1 — 100 USDT", callback_data="tariff_1"))
-    keyboard.add(InlineKeyboardButton("⚡ Тариф 2 — 220 USDT", callback_data="tariff_2"))
-    keyboard.add(InlineKeyboardButton("💎 Тариф 3 — 1000 USDT", callback_data="tariff_3"))
+    keyboard.add(InlineKeyboardButton("🔥 6 месяцев — 100 USDT", callback_data="tariff_1"))
+    keyboard.add(InlineKeyboardButton("⚡ 3 месяца — 220 USDT", callback_data="tariff_2"))
+    keyboard.add(InlineKeyboardButton("💎 VIP — 1000 USDT", callback_data="tariff_3"))
 
     await message.answer("Выбери тариф 👇", reply_markup=keyboard)
 
 @dp.callback_query_handler(lambda c: c.data in TARIFFS)
 async def process_tariff(callback_query: types.CallbackQuery):
-    await callback_query.answer("Создаю ссылку оплаты...")  # важно!
+    await callback_query.answer("Создаю ссылку...")
 
     amount = TARIFFS[callback_query.data]
     pay_url = await create_payment(amount)
 
-    await bot.send_message(
-        callback_query.from_user.id,
-        f"💳 Оплата тарифа {amount} USDT\n\n👉 Ссылка:\n{pay_url}"
-    )
+    await bot.send_message(callback_query.from_user.id, str(pay_url))
+
 
 
 app = Flask(__name__)
