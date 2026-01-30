@@ -27,7 +27,9 @@ TARIFFS = {
     "tariff_3": 1000
 }
 
-def create_payment(amount):
+import asyncio
+
+def create_payment_sync(amount):
     order_id = str(uuid.uuid4())
 
     url = "https://api.cryptocloud.plus/v1/invoice/create"
@@ -48,6 +50,12 @@ def create_payment(amount):
     r = requests.post(url, json=data, headers=headers)
     return r.json()["pay_url"]
 
+
+async def create_payment(amount):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, create_payment_sync, amount)
+
+
 @dp.message_handler(commands=["start"])
 async def start(message: types.Message):
     keyboard = InlineKeyboardMarkup()
@@ -59,13 +67,16 @@ async def start(message: types.Message):
 
 @dp.callback_query_handler(lambda c: c.data in TARIFFS)
 async def process_tariff(callback_query: types.CallbackQuery):
+    await callback_query.answer("Создаю ссылку оплаты...")  # важно!
+
     amount = TARIFFS[callback_query.data]
-    pay_url = create_payment(amount)
+    pay_url = await create_payment(amount)
 
     await bot.send_message(
         callback_query.from_user.id,
         f"💳 Оплата тарифа {amount} USDT\n\n👉 Ссылка:\n{pay_url}"
     )
+
 
 app = Flask(__name__)
 
